@@ -1,0 +1,334 @@
+TASK 5 - CHINOOK DATA EXPLORATION WITH SQLITE
+Microsoft Windows [Version 10.0.26100.5074]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\HP>cd "C:\Users\HP\OneDrive\Desktop\chinook"
+
+C:\Users\HP\OneDrive\Desktop\chinook>sqlite3 Chinook_Sqlite.sqlite
+SQLite version 3.50.4 2025-07-30 19:33:53
+Enter ".help" for usage hints.
+sqlite> .help
+.archive ...             Manage SQL archives
+.auth ON|OFF             Show authorizer callbacks
+.backup ?DB? FILE        Backup DB (default "main") to FILE
+.bail on|off             Stop after hitting an error.  Default OFF
+.cd DIRECTORY            Change the working directory to DIRECTORY
+.changes on|off          Show number of rows changed by SQL
+.check GLOB              Fail if output since .testcase does not match
+.clone NEWDB             Clone data into NEWDB from the existing database
+.connection [close] [#]  Open or close an auxiliary database connection
+.crlf ?on|off?           Whether or not to use \r\n line endings
+.databases               List names and files of attached databases
+.dbconfig ?op? ?val?     List or change sqlite3_db_config() options
+.dbinfo ?DB?             Show status information about the database
+.dbtotxt                 Hex dump of the database file
+.dump ?OBJECTS?          Render database content as SQL
+.echo on|off             Turn command echo on or off
+.eqp on|off|full|...     Enable or disable automatic EXPLAIN QUERY PLAN
+.excel                   Display the output of next command in spreadsheet
+.exit ?CODE?             Exit this program with return-code CODE
+.expert                  EXPERIMENTAL. Suggest indexes for queries
+.explain ?on|off|auto?   Change the EXPLAIN formatting mode.  Default: auto
+.filectrl CMD ...        Run various sqlite3_file_control() operations
+.fullschema ?--indent?   Show schema and the content of sqlite_stat tables
+.headers on|off          Turn display of headers on or off
+.help ?-all? ?PATTERN?   Show help text for PATTERN
+.import FILE TABLE       Import data from FILE into TABLE
+.indexes ?TABLE?         Show names of indexes
+.intck ?STEPS_PER_UNLOCK?  Run an incremental integrity check on the db
+.limit ?LIMIT? ?VAL?     Display or change the value of an SQLITE_LIMIT
+.lint OPTIONS            Report potential schema issues.
+.load FILE ?ENTRY?       Load an extension library
+.log FILE|on|off         Turn logging on or off.  FILE can be stderr/stdout
+.mode ?MODE? ?OPTIONS?   Set output mode
+.nonce STRING            Suspend safe mode for one command if nonce matches
+.nullvalue STRING        Use STRING in place of NULL values
+.once ?OPTIONS? ?FILE?   Output for the next SQL command only to FILE
+.open ?OPTIONS? ?FILE?   Close existing database and reopen FILE
+.output ?FILE?           Send output to FILE or stdout if FILE is omitted
+.parameter CMD ...       Manage SQL parameter bindings
+.print STRING...         Print literal STRING
+.progress N              Invoke progress handler after every N opcodes
+.prompt MAIN CONTINUE    Replace the standard prompts
+.quit                    Stop interpreting input stream, exit if primary.
+.read FILE               Read input from FILE or command output
+.recover                 Recover as much data as possible from corrupt db.
+.restore ?DB? FILE       Restore content of DB (default "main") from FILE
+.save ?OPTIONS? FILE     Write database to FILE (an alias for .backup ...)
+.scanstats on|off|est    Turn sqlite3_stmt_scanstatus() metrics on or off
+.schema ?PATTERN?        Show the CREATE statements matching PATTERN
+.separator COL ?ROW?     Change the column and row separators
+.session ?NAME? CMD ...  Create or control sessions
+.sha3sum ...             Compute a SHA3 hash of database content
+.shell CMD ARGS...       Run CMD ARGS... in a system shell
+.show                    Show the current values for various settings
+.stats ?ARG?             Show stats or turn stats on or off
+.system CMD ARGS...      Run CMD ARGS... in a system shell
+.tables ?TABLE?          List names of tables matching LIKE pattern TABLE
+.timeout MS              Try opening locked tables for MS milliseconds
+.timer on|off            Turn SQL timer on or off
+.trace ?OPTIONS?         Output each SQL statement as it is run
+.version                 Show source, library and compiler versions
+.vfsinfo ?AUX?           Information about the top-level VFS
+.vfslist                 List all available VFSes
+.vfsname ?AUX?           Print the name of the VFS stack
+.width NUM1 NUM2 ...     Set minimum column widths for columnar output
+.www                     Display output of the next command in web browser
+sqlite> .open C:\Users\HP\OneDrive\Desktop\chinook\Chinook_Sqlite.sqlite
+sqlite> .tables
+Album          Employee       InvoiceLine    PlaylistTrack
+Artist         Genre          MediaType      Track
+Customer       Invoice        Playlist
+sqlite> show databases
+   ...> .schema InvoiceLine
+   ...> ;
+Parse error: near "show": syntax error
+  show databases .schema InvoiceLine ;
+  ^--- error here
+sqlite> .databases
+main: C:\Users\HP\OneDrive\Desktop\chinook\Chinook_Sqlite.sqlite r/w
+sqlite> .schema InvoiceLine
+CREATE TABLE [InvoiceLine]
+(
+    [InvoiceLineId] INTEGER  NOT NULL,
+    [InvoiceId] INTEGER  NOT NULL,
+    [TrackId] INTEGER  NOT NULL,
+    [UnitPrice] NUMERIC(10,2)  NOT NULL,
+    [Quantity] INTEGER  NOT NULL,
+    CONSTRAINT [PK_InvoiceLine] PRIMARY KEY  ([InvoiceLineId]),
+    FOREIGN KEY ([InvoiceId]) REFERENCES [Invoice] ([InvoiceId])
+                ON DELETE NO ACTION ON UPDATE NO ACTION,
+    FOREIGN KEY ([TrackId]) REFERENCES [Track] ([TrackId])
+                ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+CREATE INDEX [IFK_InvoiceLineInvoiceId] ON [InvoiceLine] ([InvoiceId]);
+CREATE INDEX [IFK_InvoiceLineTrackId] ON [InvoiceLine] ([TrackId]);
+sqlite> select track.name as product
+   ...> select track.name as product,
+   ...> ;
+Parse error: near "select": syntax error
+  select track.name as product select track.name as product, ;
+                 error here ---^
+sqlite> select track.name as product,
+   ...> select track.name as productSUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) AS TotalRevenue
+   ...> ;
+Parse error: no such column: track.name
+  select track.name as product, SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity
+         ^--- error here
+sqlite> SELECT
+   ...>     Track.Name AS Product,
+   ...>     SUM(InvoiceLine.UnitPrice * InvoiceLine.Quantity) AS TotalRevenue
+   ...> FROM InvoiceLine
+   ...> JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+   ...> GROUP BY Track.Name
+   ...> ORDER BY TotalRevenue DESC
+   ...> LIMIT 10;
+The Trooper|4.95
+Walkabout|3.98
+The Woman King|3.98
+The Fix|3.98
+Pilot|3.98
+Phyllis's Wedding|3.98
+How to Stop an Exploding Man|3.98
+Hot Girl|3.98
+Gay Witch Hunt|3.98
+Branch Closing|3.98
+sqlite> SELECT *
+   ...> FROM InvoiceLine
+   ...> LIMIT 5;
+1|1|2|0.99|1
+2|1|4|0.99|1
+3|2|6|0.99|1
+4|2|8|0.99|1
+5|2|10|0.99|1
+sqlite> SELECT * FROM InvoiceLine LIMIT 5;
+1|1|2|0.99|1
+2|1|4|0.99|1
+3|2|6|0.99|1
+4|2|8|0.99|1
+5|2|10|0.99|1
+sqlite> Inovoiceline.InvoiceLineId, Inovoiceline.TrackId,Track.Name,InvoiceLine.UnitPrice, InvoiceLine.Quantity FROM InvoiceLine Join Track ON InvoiceLine.TrackId = Track.TrackId limit 5;
+Parse error: near "Inovoiceline": syntax error
+  Inovoiceline.InvoiceLineId, Inovoiceline.TrackId,Track.Name,InvoiceLine.UnitPr
+  ^--- error here
+sqlite> SELECT
+   ...>     InvoiceLine.InvoiceLineId,
+   ...>     InvoiceLine.TrackId,
+   ...>     Track.Name,
+   ...>     InvoiceLine.UnitPrice,
+   ...>     InvoiceLine.Quantity
+   ...> FROM InvoiceLine
+   ...> JOIN Track ON InvoiceLine.TrackId = Track.TrackId
+   ...> LIMIT 5;
+1|2|Balls to the Wall|0.99|1
+2|4|Restless and Wild|0.99|1
+3|6|Put The Finger On You|0.99|1
+4|8|Inject The Venom|0.99|1
+5|10|Evil Walks|0.99|1
+sqlite> SELECT
+   ...>   t.TrackId, t.Name,
+   ...>   SUM(il.Quantity) AS UnitsSold
+   ...> FROM InvoiceLine il
+   ...> JOIN Track t ON il.TrackId = t.TrackId
+   ...> GROUP BY t.TrackId, t.Name
+   ...> ORDER BY UnitsSold DESC
+   ...> LIMIT 10;
+2|Balls to the Wall|2
+8|Inject The Venom|2
+9|Snowballed|2
+20|Overdose|2
+32|Deuces Are Wild|2
+48|Not The Doctor|2
+66|Por Causa De Você|2
+84|Welcome Home (Sanitarium)|2
+161|Snowblind|2
+162|Cornucopia|2
+sqlite> SELECT TrackId, SUM(Quantity) AS TotalUnitsSold
+   ...> FROM InvoiceLine
+   ...> GROUP BY TrackId
+   ...> ORDER BY TotalUnitsSold DESC
+   ...> LIMIT 10;
+2|2
+8|2
+9|2
+20|2
+32|2
+48|2
+66|2
+84|2
+161|2
+162|2
+sqlite> SELECT BillingCountry, SUM(UnitPrice * Quantity) AS TotalRevenue
+   ...> FROM InvoiceLine
+   ...> JOIN Invoice ON InvoiceLine.InvoiceId = Invoice.InvoiceId
+   ...> GROUP BY BillingCountry;
+Argentina|37.62
+Australia|37.62
+Austria|42.62
+Belgium|37.62
+Brazil|190.1
+Canada|303.96
+Chile|46.62
+Czech Republic|90.24
+Denmark|37.62
+Finland|41.62
+France|195.1
+Germany|156.48
+Hungary|45.62
+India|75.26
+Ireland|45.62
+Italy|37.62
+Netherlands|40.62
+Norway|39.62
+Poland|37.62
+Portugal|77.24
+Spain|37.62
+Sweden|38.62
+USA|523.06
+United Kingdom|112.86
+sqlite> SELECT
+   ...>     r.RegionName,
+   ...>     SUM(s.Quantity * s.UnitPrice) AS TotalRevenue
+   ...> FROM Sales s
+   ...> JOIN Customers c ON s.CustomerID = c.CustomerID
+   ...> JOIN Regions r ON c.RegionID = r.RegionID
+   ...> GROUP BY r.RegionName
+   ...> ORDER BY TotalRevenue DESC;
+Parse error: no such table: Sales
+sqlite> SELECT
+   ...>     c.Country,
+   ...>     SUM(i.Total) AS TotalRevenue
+   ...> FROM Invoice i
+   ...> JOIN Customer c ON i.CustomerId = c.CustomerId
+   ...> GROUP BY c.Country
+   ...> ORDER BY TotalRevenue DESC;
+USA|523.06
+Canada|303.96
+France|195.1
+Brazil|190.1
+Germany|156.48
+United Kingdom|112.86
+Czech Republic|90.24
+Portugal|77.24
+India|75.26
+Chile|46.62
+Ireland|45.62
+Hungary|45.62
+Austria|42.62
+Finland|41.62
+Netherlands|40.62
+Norway|39.62
+Sweden|38.62
+Spain|37.62
+Poland|37.62
+Italy|37.62
+Denmark|37.62
+Belgium|37.62
+Australia|37.62
+Argentina|37.62
+sqlite> SELECT
+   ...>     strftime('%Y-%m', i.InvoiceDate) AS Month,
+   ...>     SUM(i.Total) AS TotalRevenue
+   ...> FROM Invoice i
+   ...> GROUP BY strftime('%Y-%m', i.InvoiceDate)
+   ...> ORDER BY Month;
+2009-01|35.64
+2009-02|37.62
+2009-03|37.62
+2009-04|37.62
+2009-05|37.62
+2009-06|37.62
+2009-07|37.62
+2009-08|37.62
+2009-09|37.62
+2009-10|37.62
+2009-11|37.62
+2009-12|37.62
+2010-01|52.62
+2010-02|46.62
+2010-03|44.62
+2010-04|37.62
+2010-05|37.62
+2010-06|37.62
+2010-07|37.62
+2010-08|37.62
+2010-09|36.63
+2010-10|37.62
+2010-11|37.62
+2010-12|37.62
+2011-01|37.62
+2011-02|37.62
+2011-03|37.62
+2011-04|51.62
+2011-05|42.62
+2011-06|50.62
+2011-07|37.62
+2011-08|37.62
+2011-09|37.62
+2011-10|37.62
+2011-11|23.76
+2011-12|37.62
+2012-01|37.62
+2012-02|37.62
+2012-03|37.62
+2012-04|37.62
+2012-05|37.62
+2012-06|37.62
+2012-07|39.62
+2012-08|47.62
+2012-09|46.71
+2012-10|42.62
+2012-11|37.62
+2012-12|37.62
+2013-01|37.62
+2013-02|27.72
+2013-03|37.62
+2013-04|33.66
+2013-05|37.62
+2013-06|37.62
+2013-07|37.62
+2013-08|37.62
+2013-09|37.62
+2013-10|37.62
+2013-11|49.62
+2013-12|38.62
