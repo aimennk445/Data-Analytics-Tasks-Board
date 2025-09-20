@@ -1,4 +1,4 @@
-# 📊 Data Analytics Mini Projects  
+# 📊 Data Analytics Tasks  
 
 This repository contains five beginner-friendly data analytics projects using **Excel, Python, and SQL**. Each task focuses on real-world datasets and essential analytical techniques.  
 
