@@ -61,6 +61,3 @@ This repository contains five beginner-friendly data analytics projects using **
 - SQL Querying  
 - Time Series Analysis  
 
----
-
-## 📂 Repository Structure  
